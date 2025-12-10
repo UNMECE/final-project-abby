@@ -13,7 +13,7 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_int_distribution<int> timeRandom(50,120);
 
-std::uniform_real_distribution<double> waterLevelRandom(0,100);
+std::uniform_real_distribution<double> waterLevelRandom(20,100);
 std::uniform_real_distribution<double> waterNeedRandom(50,100);
 std::uniform_real_distribution<double> waterCapacityRandom(100,200);
 
@@ -33,30 +33,59 @@ int regionWaterCapacity;
 std::string RegionName;
 ss<<"Random Values" <<std::endl;
 
-
+int waterDifference=0;
+int totalwaterLevel=0;
+int totalWaterNeed=0;
 std::cout<<"Current State of the Regions: " <<std::endl;
 std::cout<<"------------------------------" <<std::endl;
 for(int i = 0; i < 3;i++)
 {
+	regionWaterLevel = waterLevelRandom(gen);
+	regionWaterNeed = waterNeedRandom(gen);
+	regionWaterCapacity = waterCapacityRandom(gen);
+	waterDifference = (regionWaterNeed - regionWaterLevel);
+	std::uniform_real_distribution<double> waterLevelUpdate(waterDifference,100);
 	if(i == 0)
 	{
 		RegionName = "North";
+		while(waterDifference > 25)
+		{
+
+			regionWaterLevel = waterLevelUpdate(gen);
+			waterDifference = (regionWaterNeed- regionWaterLevel);
+		}	
 	}
 	else if(i == 1)
 	{
 		RegionName = "South";
+		while(waterDifference > 25)
+		{	
+			regionWaterLevel = waterLevelUpdate(gen);
+			waterDifference = (regionWaterNeed - regionWaterLevel);
+		}
+
 	}
 	else if(i == 2)
 	{
 		RegionName = "East";
+		waterDifference = (regionWaterNeed + totalWaterNeed) - totalwaterLevel;
+		std::cout<<"Water Difference: " <<waterDifference <<std::endl;
+		if(waterDifference > 0)
+		{
+			std::uniform_real_distribution<double> waterLevelFinal(0, 20);
+			regionWaterLevel = waterDifference + waterLevelFinal(gen);
+			while(regionWaterCapacity < regionWaterLevel)
+			{
+				regionWaterCapacity = waterCapacityRandom(gen);
+			}
+		}
 	}
 	else
 	{
 		RegionName = "Unknown";
 	}
-	regionWaterLevel = waterLevelRandom(gen);
-	regionWaterNeed = waterNeedRandom(gen);
-	regionWaterCapacity = waterCapacityRandom(gen);
+	totalwaterLevel += regionWaterLevel;
+	totalWaterNeed += regionWaterNeed;
 	std::cout <<"Region: "<<RegionName <<", Water Level: "<<regionWaterLevel <<", Water Need: " <<regionWaterNeed <<", Water Capacity: " <<regionWaterCapacity	<<std::endl;
 	ss <<RegionName <<"," <<regionWaterLevel <<"," <<regionWaterNeed <<"," <<regionWaterCapacity <<std::endl; 
 }
